@@ -4,6 +4,7 @@ import * as responseNS from "../agasresponses/IAGASResponse"
 import { AGASRequestInfo } from "../agas.model";
 import { GPFSNoteQuery } from "./GPFSNoteQuery";
 import { AGASAlertRequest } from "./AGASAlertRequest";
+import { ClientRequest } from "./ClientRequest";
 
 
 
@@ -40,12 +41,24 @@ export class AGASResponseFactory {
         var agasAlertrequestref = db.ref("AGASAlertRequest");
         agasAlertrequestref.on("child_added", function (snapshot, prevChildKey) {
             var newrequest = snapshot.val();
-              console.log(newrequest);
+            console.log(newrequest);
             var agasserver = new AGASAlertRequest();
 
             agasserver.processRequest(snapshot.key, newrequest).then(res => {
 
                 var requestref = db.ref("AGASAlertRequest/" + snapshot.key);
+                requestref.remove();
+                console.log("Removed " + snapshot.key);
+            });
+        });
+        var clientRequestref = db.ref("ClientRequest");
+        clientRequestref.on("child_added", function (snapshot, prevChildKey) {
+            var newrequest = snapshot.val();
+            console.log(newrequest);
+            var agasserver = new ClientRequest();
+            agasserver.processRequest(newrequest.serverResponder, newrequest.parameter).then(res => {
+
+                var requestref = db.ref("ClientRequest/" + snapshot.key);
                 requestref.remove();
                 console.log("Removed " + snapshot.key);
             });
